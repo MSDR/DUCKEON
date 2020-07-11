@@ -48,7 +48,6 @@ void Game::gameLoop() {
 	while (true) {
 		input.beginNewFrame();
 		
-		//Using SDL_WaitEvent over SDL_PollEvent cuts CPU usage from 17% to 0.1% !
 		if (SDL_PollEvent(&event) != 0) {
 			if (event.type == SDL_KEYDOWN) {
 				if (event.key.repeat == 0) {
