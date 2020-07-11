@@ -3,14 +3,16 @@
 #include <iostream>
 
 namespace player_constants {
-	const float RUN_MULT = 2.5f;
-	const float WALK_SPEED = 0.07f;
+	const float RUN_MULT = 2.25f;
+	const float WALK_SPEED = 0.05f;
 	const float MAX_WALK_SPEED = 0.15f;
-	const float JUMP_SPEED = 0.23f;
+	const float JUMP_SPEED = 0.25f;
+	const float DOUBLE_JUMP_MULT = 7.5f;
+	const float GLIDE_MULT = 0.85f;
 	const int PLAYER_WIDTH = 16;
 	const int PLAYER_HEIGHT = 16;
 
-	const float BASE_GRAVITY = 0.0001f;//0.0007f
+	const float BASE_GRAVITY = 0.0008f;//0.0007f
 	const float GRAVITY_CAP = 0.8f;
 }
 
@@ -19,11 +21,10 @@ Player::Player() {
 
 Player::Player(Graphics & graphics, float x, float y)
 	: AnimatedSprite(graphics, "Images/duckwalk.png", 0, 0, player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, x, y, 75),
-	dx_(0),
-	dy_(0),
+	dx_(0), dy_(0),
 	facing_(RIGHT),
-	grounded_(false)
-	
+	isGliding_(false), hasDoubleJump_(true)
+	//grounded_(false)
 {
 	graphics.loadImage("Images/duckwalk.png");
 	gravity_ = player_constants::BASE_GRAVITY;
@@ -50,10 +51,9 @@ void Player::update(float elapsedTime) {
 		gravity_ = player_constants::BASE_GRAVITY / 1.2f;
 	} else {
 		gravity_ = player_constants::BASE_GRAVITY / 0.8f;
-		if (abs(dy_) > gravity_*100) 
-			grounded_ = false;
+		grounded_ = false;
 	}
-	dy_ = std::min(dy_ + gravity_ * elapsedTime, player_constants::GRAVITY_CAP);
+	dy_ = std::min(dy_ + gravity_ * elapsedTime, player_constants::GRAVITY_CAP) * (isGliding_ && dy_ > 0.1 ? player_constants::GLIDE_MULT : 1.0f);
 
 	x_ += dx_ * elapsedTime; 
 	y_ += dy_ * elapsedTime;
@@ -65,6 +65,24 @@ void Player::update(float elapsedTime) {
 
 void Player::updateBoundingBox() {
 	boundingBox_ = Rectangle((x_+1)* globals::SPRITE_SCALE, (y_+4)* globals::SPRITE_SCALE, 14 * globals::SPRITE_SCALE, 12 * globals::SPRITE_SCALE);
+}
+
+void Player::jump() {
+	if (!hasDoubleJump_) {
+		return;
+	}
+
+	if (!grounded_) {
+		hasDoubleJump_ = false;
+		dy_ -= player_constants::DOUBLE_JUMP_MULT*dy_*dy_;
+		std::cout << "double jumpin\n";
+		return;
+	}
+
+	dy_ -= player_constants::JUMP_SPEED;
+
+	grounded_ = false;
+	std::cout << "jumpin" << std::endl;
 }
 
 void Player::move(bool isRunning, bool movingLeft) {
@@ -147,13 +165,17 @@ void Player::handleTileCollisions(std::vector<Rectangle>& others) {
 				y_ = (others.at(i).getTop() - 16*globals::SPRITE_SCALE)/globals::SPRITE_SCALE;
 				//std::cout << "collided bottom\n";
 				dy_ = 0;
+				hasDoubleJump_ = true;
+				isGliding_ = false;
+				grounded_ = true;	
+
 				break;
 			case sides::TOP :
 				y_ = (others.at(i).getBottom())/globals::SPRITE_SCALE;
 				//std::cout << "collided top, new y_: " << y_*globals::SPRITE_SCALE << "\n";
 				//if (currentAnimation_ == (facing_ == RIGHT ? "LandRight" : "LandLeft") || grounded_ == false) 
 				//	land();
-				grounded_ = true;	
+				
 				dy_ = 0;
 				break;
 			case sides::RIGHT :

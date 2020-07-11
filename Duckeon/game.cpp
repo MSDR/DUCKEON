@@ -71,18 +71,25 @@ void Game::gameLoop() {
 			player_.x_ = 50; player_.y_ = 200; player_.dy_ = 0;
 		}
 
+		if (input.wasKeyPressed(keys::jump)) {
+			player_.jump();
+		}
+		if (!player_.grounded_ && input.isKeyHeld(keys::jump)) {
+			player_.isGliding_ = true;
+		}
+		if (input.wasKeyReleased(keys::jump)) {
+			player_.isGliding_ = false;
+		}
+
 		if (input.isKeyHeld(keys::moveLeft)) {
 			player_.move(input.isKeyHeld(keys::run), true);
 		} 
-
 		if (input.isKeyHeld(keys::moveRight)) {
 			player_.move(input.isKeyHeld(keys::run), false);
 		}
-
 		if(!input.isKeyHeld(keys::moveLeft) && !input.isKeyHeld(keys::moveRight)) {
 			player_.stopMoving();
 		}
-		
 
 		int CURRENT_TIME_MILLIS = SDL_GetTicks();
 		int ELAPSED_TIME_MILLIS = CURRENT_TIME_MILLIS - LAST_UPDATE_TIME;

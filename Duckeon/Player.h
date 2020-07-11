@@ -20,6 +20,7 @@ public:
 	//void moveLeft(bool isWalking);
 	//void moveRight(bool isWalking);
 
+	void jump();
 	void move(bool isRunning, bool movingLeft);
 	void stopMoving();
 
@@ -34,13 +35,15 @@ public:
 	float dx_;
 	float dy_;
 
-private:
-	
+	bool isGliding_;
+	bool hasDoubleJump_;
+	bool grounded_;
 
+private:
 	float gravity_;
 
-	bool grounded_;
-	bool overrideGrounded_; //Set to true when the full jump animation completes, essentially "charging" the double jump
+
+	//bool overrideGrounded_; //Set to true when the full jump animation completes, essentially "charging" the double jump
 
 	Direction facing_;
 };
