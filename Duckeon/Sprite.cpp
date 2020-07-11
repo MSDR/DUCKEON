@@ -55,10 +55,10 @@ const sides::Side Sprite::getCollisionSide(Rectangle & other) const {
 	}
 
 	return
-		lowest == abs(amtRight) ? sides::LEFT :
-		lowest == abs(amtLeft) ? sides::RIGHT :
-		lowest == abs(amtTop) ? sides::BOTTOM :
-		lowest == abs(amtBottom) ? sides::TOP :
+		lowest == abs(amtRight) ? sides::RIGHT :
+		lowest == abs(amtLeft) ? sides::LEFT :
+		lowest == abs(amtTop) ? sides::TOP :
+		lowest == abs(amtBottom) ? sides::BOTTOM :
 		sides::NONE;
 }
 

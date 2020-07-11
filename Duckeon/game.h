@@ -3,6 +3,7 @@
 
 #include "Graphics.h"
 #include "Input.h"
+#include "Level.h"
 #include "Player.h"
 
 #include "SDL_include/SDL.h"
@@ -26,7 +27,10 @@ public:
 	//Updates member variables appropriately
 	void update(float elapsedTime);
 
+private:
 	Player player_;
+	Level level_;
+	SDL_Texture* background_;
 
 };
 

@@ -3,7 +3,6 @@
 #include "AnimatedSprite.h"
 #include "graphics.h"
 #include "Globals.h"
-#include <SDL.h>
 
 
 class Player : public AnimatedSprite {
@@ -32,9 +31,11 @@ public:
 	const float getX() const;
 	const float getY() const;
 	
-private:
 	float dx_;
 	float dy_;
+
+private:
+	
 
 	float gravity_;
 

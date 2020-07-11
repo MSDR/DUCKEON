@@ -3,13 +3,14 @@
 #include <iostream>
 
 namespace player_constants {
-	const float RUN_MULT = 1.5f;
-	const float WALK_SPEED = 0.05f;
+	const float RUN_MULT = 2.5f;
+	const float WALK_SPEED = 0.07f;
+	const float MAX_WALK_SPEED = 0.15f;
 	const float JUMP_SPEED = 0.23f;
 	const int PLAYER_WIDTH = 16;
 	const int PLAYER_HEIGHT = 16;
 
-	const float BASE_GRAVITY = 0.0007f;
+	const float BASE_GRAVITY = 0.0001f;//0.0007f
 	const float GRAVITY_CAP = 0.8f;
 }
 
@@ -35,11 +36,11 @@ void Player::draw(Graphics & graphics) {
 	AnimatedSprite::draw(graphics, x_, y_);
 
 	//shows player bounding box 
-	/*{   SDL_Renderer* renderer = graphics.getRenderer();
+	{   SDL_Renderer* renderer = graphics.getRenderer();
 		SDL_Rect r = { boundingBox_.getLeft(), boundingBox_.getTop(), boundingBox_.getWidth(), boundingBox_.getHeight() };
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-		SDL_RenderFillRect(renderer, &r); 
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); }*/
+		//SDL_RenderFillRect(renderer, &r); 
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); }
 		 
 }
 
@@ -55,7 +56,7 @@ void Player::update(float elapsedTime) {
 	dy_ = std::min(dy_ + gravity_ * elapsedTime, player_constants::GRAVITY_CAP);
 
 	x_ += dx_ * elapsedTime; 
-	//y_ += dy_ * elapsedTime;
+	y_ += dy_ * elapsedTime;
 	//std::cout << "Player x, " << x_*globals::SPRITE_SCALE << "y: " << y_ * globals::SPRITE_SCALE << "\n";
 	//std::cout << "Bounds x, " << boundingBox_.x_ << "y: " << boundingBox_.y_ << " Bound bottom" << boundingBox_.getBottom() << "\n";
 	AnimatedSprite::update(elapsedTime);
@@ -63,14 +64,18 @@ void Player::update(float elapsedTime) {
 }
 
 void Player::updateBoundingBox() {
-	boundingBox_ = Rectangle((x_ + 6) * globals::SPRITE_SCALE, (y_ + 8) * globals::SPRITE_SCALE, 6 * globals::SPRITE_SCALE, 19 * globals::SPRITE_SCALE);
+	boundingBox_ = Rectangle((x_+1)* globals::SPRITE_SCALE, (y_+4)* globals::SPRITE_SCALE, 14 * globals::SPRITE_SCALE, 12 * globals::SPRITE_SCALE);
 }
 
 void Player::move(bool isRunning, bool movingLeft) {
-	dx_ = player_constants::WALK_SPEED;
-	if (movingLeft) dx_ *= -1;
-	if (isRunning) dx_ *= player_constants::RUN_MULT;
+	dx_ = (dx_ <= 0.1f ? player_constants::WALK_SPEED : dx_);
 
+	if (isRunning) dx_ = player_constants::MAX_WALK_SPEED*player_constants::RUN_MULT;
+	else dx_ += std::max((player_constants::MAX_WALK_SPEED-std::abs(dx_))/4, 0.0f);
+
+	if (movingLeft) dx_ *= -1;
+
+	std::cout << dx_ << std::endl;
 	playAnimation(movingLeft ? "L_Walk" : "R_Walk");
 }
 
@@ -139,27 +144,26 @@ void Player::handleTileCollisions(std::vector<Rectangle>& others) {
 		if (collisionSide != sides::NONE) {
 			switch (collisionSide) {
 			case sides::BOTTOM :
-				y_ = (others.at(i).getBottom()-7*globals::SPRITE_SCALE)/globals::SPRITE_SCALE + 1;
-				std::cout << "collided bottom\n";
+				y_ = (others.at(i).getTop() - 16*globals::SPRITE_SCALE)/globals::SPRITE_SCALE;
+				//std::cout << "collided bottom\n";
 				dy_ = 0;
 				break;
 			case sides::TOP :
-				y_ = (others.at(i).getTop() - Sprite::getHeight())/globals::SPRITE_SCALE - 1;
-				std::cout << "collided top, new y_: " << y_*globals::SPRITE_SCALE << "\n";
+				y_ = (others.at(i).getBottom())/globals::SPRITE_SCALE;
+				//std::cout << "collided top, new y_: " << y_*globals::SPRITE_SCALE << "\n";
 				//if (currentAnimation_ == (facing_ == RIGHT ? "LandRight" : "LandLeft") || grounded_ == false) 
 				//	land();
 				grounded_ = true;	
 				dy_ = 0;
 				break;
 			case sides::RIGHT :
-				x_ = (others.at(i).getRight()-5*globals::SPRITE_SCALE) / globals::SPRITE_SCALE - 1;
-				std::cout << "collided right\n";
-				//dx_ = 0;
+				x_ = (others.at(i).getLeft() - 15*globals::SPRITE_SCALE) / globals::SPRITE_SCALE;
+				//std::cout << "collided right\n";
+				dx_ = 0;
 				break;
 			case sides::LEFT :
-				std::cout << "Diff in box to sprite left: " << y_ - (boundingBox_.getLeft() / globals::SPRITE_SCALE) << "\n";
-				x_ = (others.at(i).getLeft() - Sprite::getWidth() + 5*globals::SPRITE_SCALE) / globals::SPRITE_SCALE + 1;
-				std::cout << " collided left\n";
+				x_ = (others.at(i).getRight() + 1*globals::SPRITE_SCALE) / globals::SPRITE_SCALE;
+				//std::cout << " collided left\n";
 				break;
 			}
 		}

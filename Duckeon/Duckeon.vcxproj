@@ -132,9 +132,11 @@
     <ClCompile Include="game.cpp" />
     <ClCompile Include="graphics.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Level.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Sprite.cpp" />
+    <ClCompile Include="Tile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimatedSprite.h" />
@@ -142,13 +144,11 @@
     <ClInclude Include="Globals.h" />
     <ClInclude Include="graphics.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="Level.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Rectangle.h" />
     <ClInclude Include="Sprite.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="SDL2.dll" />
-    <None Include="SDL2_image.dll" />
+    <ClInclude Include="Tile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

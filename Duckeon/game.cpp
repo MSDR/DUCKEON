@@ -22,6 +22,7 @@ Game::Game() {
 		SDL_Quit();
 	}
 	SDL_ShowCursor(SDL_DISABLE);
+
 	gameLoop();
 }
 
@@ -36,7 +37,10 @@ void Game::gameLoop() {
 	Input input;
 	SDL_Event event;
 
-	player_ = Player(graphics, 10, 10);
+	player_ = Player(graphics, 50, 200);
+	level_ = Level();
+	level_.changeMap(graphics, "demo");
+	background_ = SDL_CreateTextureFromSurface(graphics.getRenderer(), IMG_Load("Images/background.png"));
 
 	int LAST_UPDATE_TIME = SDL_GetTicks();
 
@@ -62,6 +66,10 @@ void Game::gameLoop() {
 			return;
 		} 
 
+		if (input.wasKeyPressed(SDL_SCANCODE_R)) {
+			player_.x_ = 50; player_.y_ = 200; player_.dy_ = 0;
+		}
+
 		if (input.isKeyHeld(keys::moveLeft)) {
 			player_.move(input.isKeyHeld(keys::run), true);
 		} 
@@ -86,11 +94,23 @@ void Game::gameLoop() {
 //Primary draw function across game
 void Game::draw(Graphics &graphics) {
 	graphics.clear();
+	SDL_RenderCopy(graphics.getRenderer(), background_, NULL, NULL);
 	player_.draw(graphics);
+	level_.draw(graphics);
 	graphics.flip();
 }
 
 void Game::update(float elapsedTime) {
 	player_.update(elapsedTime);
+	level_.update(elapsedTime);
 
+
+	std::vector<Rectangle> rectsColliding;
+	if ((rectsColliding = level_.checkTileCollisions(player_.getBoundingBox())).size() > 0){
+		player_.handleTileCollisions(rectsColliding);
+	}
+	rectsColliding.clear(); //collision called twice due to some quirk that wrongly called for a collision on top if running into a wall
+	if ((rectsColliding = level_.checkTileCollisions(player_.getBoundingBox())).size() > 0) {
+		player_.handleTileCollisions(rectsColliding);
+	}
 }

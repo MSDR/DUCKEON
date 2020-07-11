@@ -4,7 +4,7 @@
 #include <vector>
 
 namespace globals {
-	const float SPRITE_SCALE = 14;
+	const float SPRITE_SCALE = 3.75;
 
 	const int WINDOW_WIDTH = 1920;
 	const int WINDOW_HEIGHT = 1080;

@@ -21,11 +21,13 @@ public:
 	const float getWidth() const;
 	const float getHeight() const;
 
+	float x_;
+	float y_;
+
 protected:
 	SDL_Rect sourceRect_;
 	SDL_Texture* spriteSheet_;
-	float x_;
-	float y_;
+	
 
 	Rectangle boundingBox_;
 
