@@ -71,7 +71,7 @@ void Player::move(bool isRunning, bool movingLeft) {
 	dx_ = (dx_ <= 0.1f ? player_constants::WALK_SPEED : dx_);
 
 	if (isRunning) dx_ = player_constants::MAX_WALK_SPEED*player_constants::RUN_MULT;
-	else dx_ += std::max((player_constants::MAX_WALK_SPEED-std::abs(dx_))/4, 0.0f);
+	else dx_ += std::max((player_constants::MAX_WALK_SPEED-std::abs(dx_))/2, 0.0f);
 
 	if (movingLeft) dx_ *= -1;
 

@@ -1,8 +1,8 @@
 #include "game.h"
 
-namespace {
-	const int FPS = 60;
-	const int MAX_FRAME_TIME = 75;
+namespace settings {
+	int DRAW_FPS = 120;
+	int UPDATE_FPS = 120;
 }
 
 namespace keys {
@@ -43,11 +43,13 @@ void Game::gameLoop() {
 	background_ = SDL_CreateTextureFromSurface(graphics.getRenderer(), IMG_Load("Images/background.png"));
 
 	int LAST_UPDATE_TIME = SDL_GetTicks();
+	int LAST_DRAW_TIME = LAST_UPDATE_TIME;
 
 	//Start game loop
 	while (true) {
 		input.beginNewFrame();
 		
+		//Using SDL_WaitEvent over SDL_PollEvent cuts CPU usage from 17% to 0.1% !
 		if (SDL_PollEvent(&event) != 0) {
 			if (event.type == SDL_KEYDOWN) {
 				if (event.key.repeat == 0) {
@@ -82,18 +84,29 @@ void Game::gameLoop() {
 		}
 		
 
-		const int CURRENT_TIME_MILLIS = SDL_GetTicks();
+		int CURRENT_TIME_MILLIS = SDL_GetTicks();
 		int ELAPSED_TIME_MILLIS = CURRENT_TIME_MILLIS - LAST_UPDATE_TIME;
-		update(std::min(ELAPSED_TIME_MILLIS, MAX_FRAME_TIME));
+
+		if(ELAPSED_TIME_MILLIS < 1000/settings::UPDATE_FPS) 
+			SDL_Delay(1000 / settings::UPDATE_FPS - ELAPSED_TIME_MILLIS);
+
+		CURRENT_TIME_MILLIS = SDL_GetTicks();
+		ELAPSED_TIME_MILLIS = CURRENT_TIME_MILLIS - LAST_UPDATE_TIME;
+
+		update(ELAPSED_TIME_MILLIS);
 		LAST_UPDATE_TIME = CURRENT_TIME_MILLIS;
-		draw(graphics);
+		
+		if(CURRENT_TIME_MILLIS-LAST_DRAW_TIME > 1000/settings::DRAW_FPS) {
+			draw(graphics);
+			LAST_DRAW_TIME = SDL_GetTicks();
+		}
 	}//end game loop
 }
 
 //Primary draw function across game
 void Game::draw(Graphics &graphics) {
 	graphics.clear();
-	SDL_RenderCopy(graphics.getRenderer(), background_, NULL, NULL);
+	//SDL_RenderCopy(graphics.getRenderer(), background_, NULL, NULL);
 	player_.draw(graphics);
 	level_.draw(graphics);
 	graphics.flip();
