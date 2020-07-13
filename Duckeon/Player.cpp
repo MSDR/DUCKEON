@@ -1,6 +1,4 @@
 #include "Player.h"
-#include <algorithm>
-#include <iostream>
 
 
 
@@ -8,17 +6,16 @@ Player::Player() {
 }
 
 Player::Player(Graphics & graphics, float x, float y)
-	: AnimatedSprite(graphics, "Images/duckwalk.png", 0, 0, p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, x, y, 75),
+	: AnimatedSprite(graphics, "Images/duck.png", 0, 0, p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, x, y, 75),
 	dx_(0), dy_(0),
-	facing_(RIGHT),
-	isGliding_(false), hasDoubleJump_(true)
+	facing_(LEFT),
+	isGliding_(false), hasDoubleJump_(true), msSinceGrounded_(0.0f)
 	//grounded_(false)
 {
-	graphics.loadImage("Images/duckwalk.png");
+	graphics.loadImage("Images/duck.png");
 	gravity_ = p_consts::BASE_GRAVITY;
 	setUpAnimations();
-	currentAnimation_ = "L_Idle";
-	playAnimation("L_Idle");
+	playAnimation("Idle");
 }
 
 void Player::draw(Graphics & graphics) {
@@ -30,14 +27,14 @@ void Player::draw(Graphics & graphics) {
 		SDL_SetRenderDrawColor(renderer, 6, 238, 89, 200);
 
 		SDL_Rect r = { facing_ == LEFT ? boundingBox_.getRight() : boundingBox_.getLeft()-3*globals::SPRITE_SCALE, boundingBox_.getTop(), 
-							3*globals::SPRITE_SCALE, 7.5*globals::SPRITE_SCALE };
+							3*globals::SPRITE_SCALE, 7*globals::SPRITE_SCALE };
 		SDL_RenderDrawRect(renderer, &r); 
 
 		if(hasDoubleJump_) {
-			float jumpMeter = std::abs(doubleJumpHeight()/p_consts::MAX_DOUBLE_JUMP);
+			float jumpMeter = std::abs((doubleJumpHeight())/p_consts::MAX_DOUBLE_JUMP);
 			std::cout << jumpMeter << std::endl;
-			r.y += 7.5*globals::SPRITE_SCALE - (int)(7.5*globals::SPRITE_SCALE)*jumpMeter;
-			r.h = (7.5*globals::SPRITE_SCALE*jumpMeter);
+			r.y += 7*globals::SPRITE_SCALE - (int)(7*globals::SPRITE_SCALE)*jumpMeter;
+			r.h = (7*globals::SPRITE_SCALE*jumpMeter);
 			SDL_RenderFillRect(renderer, &r); 
 		}
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); 
@@ -53,6 +50,8 @@ void Player::draw(Graphics & graphics) {
 }
 
 void Player::update(float elapsedTime) {
+	msSinceGrounded_ += elapsedTime; //collision check comes after update
+
 	//apply gravity
 	if (dy_ <= 0) {
 		gravity_ = p_consts::BASE_GRAVITY / 1.2f;
@@ -80,8 +79,8 @@ void Player::jump() {
 	}
 
 	if (!grounded_) {
-		hasDoubleJump_ = false;
-		dy_ -= doubleJumpHeight();
+		hasDoubleJump_ = msSinceGrounded_ < p_consts::JUMP_FORGIVENESS_WINDOW ? hasDoubleJump_ : false;
+		dy_ = -doubleJumpHeight();
 		//std::cout << "double jumpin\n";
 		return;
 	}
@@ -92,22 +91,27 @@ void Player::jump() {
 	//std::cout << "jumpin" << std::endl;
 }
 
-void Player::move(bool isRunning, bool movingLeft) {
+void Player::move(bool isRunning, Direction dir) {
 	dx_ = (dx_ <= 0.1f ? p_consts::WALK_SPEED : dx_);
 
 	if (isRunning) dx_ = p_consts::MAX_WALK_SPEED*p_consts::RUN_MULT;
 	else dx_ += std::max((p_consts::MAX_WALK_SPEED-std::abs(dx_))/2, 0.0f);
 
-	if (movingLeft) dx_ *= -1;
+	if (dir == LEFT) { 
+		dx_ *= -1;
+		facing_ = LEFT;
+	} else {
+		facing_ = RIGHT;
+	}
 
-	std::cout << dx_ << std::endl;
-	playAnimation(movingLeft ? "L_Walk" : "R_Walk");
+	//std::cout << dx_ << std::endl;
+	playAnimation("Walk");
 }
 
 
 void Player::stopMoving() {
 	dx_ = 0;
-	playAnimation(currentAnimation_.substr(0,1) + "_Idle");
+	if (!isGliding_) playAnimation("Idle");
 	
 	/*
 	if (currentAnimation_ == (facing_ == RIGHT ? "RunRight" : "RunLeft")) { 	
@@ -136,11 +140,14 @@ void Player::animationDone(std::string currentAnimation) {
 }
 
 void Player::setUpAnimations() {
-	addAnimation(1, 0, 1, "L_Idle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(1, 4, 0, "L_Idle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
 	addAnimation(1, 0, 0, "R_Idle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
 
-	addAnimation(4, 0, 1, "L_Walk", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(4, 4, 0, "L_Walk", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
 	addAnimation(4, 0, 0, "R_Walk", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+
+	addAnimation(4, 4, 2, "L_Glide", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(4, 0, 2, "R_Glide", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
 
 	/*addAnimation(1, 13, 0, "IdleLeft", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
 
@@ -175,7 +182,7 @@ void Player::handleTileCollisions(std::vector<Rectangle>& others) {
 				hasDoubleJump_ = true;
 				isGliding_ = false;
 				grounded_ = true;	
-
+				msSinceGrounded_ = 0.0f;
 				break;
 			case sides::TOP :
 				y_ = (others.at(i).getBottom())/globals::SPRITE_SCALE;

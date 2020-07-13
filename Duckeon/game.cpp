@@ -71,24 +71,31 @@ void Game::gameLoop() {
 			player_.x_ = 50; player_.y_ = 200; player_.dy_ = 0;
 		}
 
+		//Movement
+
+		if (input.isKeyHeld(keys::moveLeft)) {
+			player_.move(input.isKeyHeld(keys::run), LEFT);
+		} 
+		if (input.isKeyHeld(keys::moveRight)) {
+			player_.move(input.isKeyHeld(keys::run), RIGHT);
+		}
+		if(!input.isKeyHeld(keys::moveLeft) && !input.isKeyHeld(keys::moveRight)) {
+			player_.stopMoving();
+		}
+
 		if (input.wasKeyPressed(keys::jump)) {
+			player_.jump();
+		}
+		if (input.wasKeyReleased(keys::jump) && player_.grounded_ == false) {
 			player_.jump();
 		}
 		if (!player_.grounded_ && input.isKeyHeld(keys::jump)) {
 			player_.isGliding_ = true;
+			player_.playAnimation("Glide");
 		}
 		if (input.wasKeyReleased(keys::jump)) {
 			player_.isGliding_ = false;
-		}
-
-		if (input.isKeyHeld(keys::moveLeft)) {
-			player_.move(input.isKeyHeld(keys::run), true);
-		} 
-		if (input.isKeyHeld(keys::moveRight)) {
-			player_.move(input.isKeyHeld(keys::run), false);
-		}
-		if(!input.isKeyHeld(keys::moveLeft) && !input.isKeyHeld(keys::moveRight)) {
-			player_.stopMoving();
+			player_.playAnimation("Idle");
 		}
 
 		int CURRENT_TIME_MILLIS = SDL_GetTicks();

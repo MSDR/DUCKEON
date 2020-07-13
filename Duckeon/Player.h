@@ -5,15 +5,22 @@
 #include "Globals.h"
 
 #include <algorithm>
+#include <iostream>
 
 namespace p_consts {
 	const float RUN_MULT = 1.75f;
 	const float WALK_SPEED = 0.0225f;
 	const float MAX_WALK_SPEED = 0.14f;
-	const float JUMP_SPEED = 0.225f;
-	const float DOUBLE_JUMP_MULT = 4.20f;
-	const float MIN_DOUBLE_JUMP_SPEED = -0.0265f;
-	const float MAX_DOUBLE_JUMP = 0.495f;
+
+	const float JUMP_SPEED = 0.227f;
+	const float JUMP_FORGIVENESS_WINDOW = 75.0f;
+	const float MIN_DOUBLE_JUMP = 0.07f;
+	const float MAX_DOUBLE_JUMP = 0.27f;
+	const float DOUBLE_JUMP_CHARGE = 500.0f;
+
+//	const float DOUBLE_JUMP_MULT = 4.20f;
+//	const float MIN_DOUBLE_JUMP_SPEED = -0.0265f;
+//	const float MAX_DOUBLE_JUMP = 0.495f;
 	const float GLIDE_MULT = 0.575f;
 	const float GLIDE_START_SPEED = 0.1f;
 
@@ -41,9 +48,11 @@ public:
 	//void moveRight(bool isWalking);
 
 	void jump();
-	void move(bool isRunning, bool movingLeft);
+	void move(bool isRunning, Direction dir);
 	void stopMoving();
 
+	void playAnimation(std::string animation, bool once = false)
+		{	AnimatedSprite::playAnimation((facing_ == LEFT ? "L_" : "R_") + animation, once); }
 	virtual void animationDone(std::string currentAnimation);
 	virtual void setUpAnimations();
 
@@ -58,13 +67,18 @@ public:
 	bool isGliding_;
 	bool hasDoubleJump_;
 	bool grounded_;
+	float msSinceGrounded_;
 
 private:
 	float gravity_;
 
 	float doubleJumpHeight() { 
-		return std::min(std::abs(p_consts::DOUBLE_JUMP_MULT * std::max(5*dy_/6, p_consts::MIN_DOUBLE_JUMP_SPEED)), 
-			p_consts::MAX_DOUBLE_JUMP); 
+		return ((msSinceGrounded_ > p_consts::DOUBLE_JUMP_CHARGE ? 1 : std::pow(msSinceGrounded_/p_consts::DOUBLE_JUMP_CHARGE, 2)) *
+				  (p_consts::MAX_DOUBLE_JUMP-p_consts::MIN_DOUBLE_JUMP)) +
+				 p_consts::MIN_DOUBLE_JUMP;
+			
+			//std::min(std::abs(p_consts::DOUBLE_JUMP_MULT * std::max(5*dy_/6, p_consts::MIN_DOUBLE_JUMP_SPEED)), 
+			//p_consts::MAX_DOUBLE_JUMP); 
 	}
 
 	//bool overrideGrounded_; //Set to true when the full jump animation completes, essentially "charging" the double jump
