@@ -37,7 +37,7 @@ void Game::gameLoop() {
 	Input input;
 	SDL_Event event;
 
-	player_ = Player(graphics, 50, 200);
+	player_ = Player(graphics, 120, 200);
 	level_ = Level();
 	level_.changeMap(graphics, "demo");
 	background_ = SDL_CreateTextureFromSurface(graphics.getRenderer(), IMG_Load("Images/background.png"));

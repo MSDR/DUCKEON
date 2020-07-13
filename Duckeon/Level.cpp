@@ -104,7 +104,7 @@ void Level::loadMap(Graphics & graphics, const std::string &mapName) {
 				//std::cout << "Rects x: " << tileX * globals::SPRITE_SCALE << " Rects y: " << tileY * globals::SPRITE_SCALE << "\n";
 				collisionRects_.push_back(Rectangle(tileX * globals::SPRITE_SCALE, tileY * globals::SPRITE_SCALE,
 					16 * globals::SPRITE_SCALE, 16 * globals::SPRITE_SCALE));
-				Tile tile(tiles::collision.getTileName(), tilePos); loadedTiles_.push_back(tile);  //REMOVE COMMENT IF SHOW COLLISION
+				//Tile tile(tiles::collision.getTileName(), tilePos); loadedTiles_.push_back(tile);  //REMOVE COMMENT IF SHOW COLLISION
 			}
 		}
 

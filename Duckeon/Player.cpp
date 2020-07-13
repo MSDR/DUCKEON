@@ -2,32 +2,20 @@
 #include <algorithm>
 #include <iostream>
 
-namespace player_constants {
-	const float RUN_MULT = 2.25f;
-	const float WALK_SPEED = 0.05f;
-	const float MAX_WALK_SPEED = 0.15f;
-	const float JUMP_SPEED = 0.25f;
-	const float DOUBLE_JUMP_MULT = 7.5f;
-	const float GLIDE_MULT = 0.85f;
-	const int PLAYER_WIDTH = 16;
-	const int PLAYER_HEIGHT = 16;
 
-	const float BASE_GRAVITY = 0.0008f;//0.0007f
-	const float GRAVITY_CAP = 0.8f;
-}
 
 Player::Player() {
 }
 
 Player::Player(Graphics & graphics, float x, float y)
-	: AnimatedSprite(graphics, "Images/duckwalk.png", 0, 0, player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, x, y, 75),
+	: AnimatedSprite(graphics, "Images/duckwalk.png", 0, 0, p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, x, y, 75),
 	dx_(0), dy_(0),
 	facing_(RIGHT),
 	isGliding_(false), hasDoubleJump_(true)
 	//grounded_(false)
 {
 	graphics.loadImage("Images/duckwalk.png");
-	gravity_ = player_constants::BASE_GRAVITY;
+	gravity_ = p_consts::BASE_GRAVITY;
 	setUpAnimations();
 	currentAnimation_ = "L_Idle";
 	playAnimation("L_Idle");
@@ -36,24 +24,43 @@ Player::Player(Graphics & graphics, float x, float y)
 void Player::draw(Graphics & graphics) {
 	AnimatedSprite::draw(graphics, x_, y_);
 
+	SDL_Renderer* renderer = graphics.getRenderer();
+
+	if(!grounded_) {
+		SDL_SetRenderDrawColor(renderer, 6, 238, 89, 200);
+
+		SDL_Rect r = { facing_ == LEFT ? boundingBox_.getRight() : boundingBox_.getLeft()-3*globals::SPRITE_SCALE, boundingBox_.getTop(), 
+							3*globals::SPRITE_SCALE, 7.5*globals::SPRITE_SCALE };
+		SDL_RenderDrawRect(renderer, &r); 
+
+		if(hasDoubleJump_) {
+			float jumpMeter = std::abs(doubleJumpHeight()/p_consts::MAX_DOUBLE_JUMP);
+			std::cout << jumpMeter << std::endl;
+			r.y += 7.5*globals::SPRITE_SCALE - (int)(7.5*globals::SPRITE_SCALE)*jumpMeter;
+			r.h = (7.5*globals::SPRITE_SCALE*jumpMeter);
+			SDL_RenderFillRect(renderer, &r); 
+		}
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); 
+	}
+		
+
 	//shows player bounding box 
-	{   SDL_Renderer* renderer = graphics.getRenderer();
-		SDL_Rect r = { boundingBox_.getLeft(), boundingBox_.getTop(), boundingBox_.getWidth(), boundingBox_.getHeight() };
+	/*{ r = { boundingBox_.getLeft(), boundingBox_.getTop(), boundingBox_.getWidth(), boundingBox_.getHeight() };
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-		//SDL_RenderFillRect(renderer, &r); 
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); }
+		//SDL_RenderDrawRect(renderer, &r); 
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); }*/
 		 
 }
 
 void Player::update(float elapsedTime) {
 	//apply gravity
 	if (dy_ <= 0) {
-		gravity_ = player_constants::BASE_GRAVITY / 1.2f;
+		gravity_ = p_consts::BASE_GRAVITY / 1.2f;
 	} else {
-		gravity_ = player_constants::BASE_GRAVITY / 0.8f;
+		gravity_ = p_consts::BASE_GRAVITY / 0.8f;
 		grounded_ = false;
 	}
-	dy_ = std::min(dy_ + gravity_ * elapsedTime, player_constants::GRAVITY_CAP) * (isGliding_ && dy_ > 0.1 ? player_constants::GLIDE_MULT : 1.0f);
+	dy_ = std::min(dy_ + gravity_ * elapsedTime, p_consts::GRAVITY_CAP) * (isGliding_ && dy_ > p_consts::GLIDE_START_SPEED ? p_consts::GLIDE_MULT : 1.0f);
 
 	x_ += dx_ * elapsedTime; 
 	y_ += dy_ * elapsedTime;
@@ -74,22 +81,22 @@ void Player::jump() {
 
 	if (!grounded_) {
 		hasDoubleJump_ = false;
-		dy_ -= player_constants::DOUBLE_JUMP_MULT*dy_*dy_;
-		std::cout << "double jumpin\n";
+		dy_ -= doubleJumpHeight();
+		//std::cout << "double jumpin\n";
 		return;
 	}
 
-	dy_ -= player_constants::JUMP_SPEED;
+	dy_ -= p_consts::JUMP_SPEED;
 
 	grounded_ = false;
-	std::cout << "jumpin" << std::endl;
+	//std::cout << "jumpin" << std::endl;
 }
 
 void Player::move(bool isRunning, bool movingLeft) {
-	dx_ = (dx_ <= 0.1f ? player_constants::WALK_SPEED : dx_);
+	dx_ = (dx_ <= 0.1f ? p_consts::WALK_SPEED : dx_);
 
-	if (isRunning) dx_ = player_constants::MAX_WALK_SPEED*player_constants::RUN_MULT;
-	else dx_ += std::max((player_constants::MAX_WALK_SPEED-std::abs(dx_))/2, 0.0f);
+	if (isRunning) dx_ = p_consts::MAX_WALK_SPEED*p_consts::RUN_MULT;
+	else dx_ += std::max((p_consts::MAX_WALK_SPEED-std::abs(dx_))/2, 0.0f);
 
 	if (movingLeft) dx_ *= -1;
 
@@ -104,7 +111,7 @@ void Player::stopMoving() {
 	
 	/*
 	if (currentAnimation_ == (facing_ == RIGHT ? "RunRight" : "RunLeft")) { 	
-		dx_ = (facing_ == RIGHT ? 1 : -1) * player_constants::RUN_SPEED / (20 * (frameIndex_ + 1));	
+		dx_ = (facing_ == RIGHT ? 1 : -1) * p_consts::RUN_SPEED / (20 * (frameIndex_ + 1));	
 		playAnimation(facing_ == RIGHT ? "StopRunRight" : "StopRunLeft");
 	} else if(currentAnimation_ != "StopRunRight" && currentAnimation_ != "StopRunLeft"){	
 		dx_ = 0;
@@ -129,30 +136,30 @@ void Player::animationDone(std::string currentAnimation) {
 }
 
 void Player::setUpAnimations() {
-	addAnimation(1, 0, 1, "L_Idle", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
-	addAnimation(1, 0, 0, "R_Idle", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(1, 0, 1, "L_Idle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(1, 0, 0, "R_Idle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
 
-	addAnimation(4, 0, 1, "L_Walk", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
-	addAnimation(4, 0, 0, "R_Walk", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(4, 0, 1, "L_Walk", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(4, 0, 0, "R_Walk", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
 
-	/*addAnimation(1, 13, 0, "IdleLeft", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
+	/*addAnimation(1, 13, 0, "IdleLeft", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
 
-	addAnimation(3, 0, 1, "JumpRight", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
-	addAnimation(3, 13, 1, "JumpLeft", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
-	addAnimation(1, 3, 1, "FallRight", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
-	addAnimation(1, 16, 1, "FallLeft", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
-	addAnimation(3, 4, 1, "LandRight", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
-	addAnimation(3, 17, 1, "LandLeft", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(3, 0, 1, "JumpRight", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(3, 13, 1, "JumpLeft", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(1, 3, 1, "FallRight", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(1, 16, 1, "FallLeft", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(3, 4, 1, "LandRight", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(3, 17, 1, "LandLeft", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
 
-	addAnimation(3, 0, 2, "WalkRight", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
-	addAnimation(3, 13, 2, "WalkLeft", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(3, 0, 2, "WalkRight", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(3, 13, 2, "WalkLeft", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
 
-	addAnimation(3, 0, 3, "StartRunRight", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
-	addAnimation(4, 3, 3, "RunRight", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
-	addAnimation(6, 7, 3, "StopRunRight", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
-	addAnimation(3, 13, 3, "StartRunLeft", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
-	addAnimation(4, 16, 3, "RunLeft", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));
-	addAnimation(6, 20, 3, "StopRunLeft", player_constants::PLAYER_WIDTH, player_constants::PLAYER_HEIGHT, Vector2(0, 0));*/
+	addAnimation(3, 0, 3, "StartRunRight", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(4, 3, 3, "RunRight", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(6, 7, 3, "StopRunRight", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(3, 13, 3, "StartRunLeft", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(4, 16, 3, "RunLeft", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(6, 20, 3, "StopRunLeft", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));*/
 }
 
 void Player::handleTileCollisions(std::vector<Rectangle>& others) {
@@ -184,7 +191,7 @@ void Player::handleTileCollisions(std::vector<Rectangle>& others) {
 				dx_ = 0;
 				break;
 			case sides::LEFT :
-				x_ = (others.at(i).getRight() + 1*globals::SPRITE_SCALE) / globals::SPRITE_SCALE;
+				x_ = (others.at(i).getRight()) / globals::SPRITE_SCALE;
 				//std::cout << " collided left\n";
 				break;
 			}
@@ -205,6 +212,7 @@ const float Player::getY() const {
 
 
 
+
 /*
 void Player::disableDoubleJump() {
 grounded_ = false;
@@ -219,9 +227,9 @@ playAnimation(facing_ == RIGHT ? "JumpRight" : "JumpLeft");
 void Player::launch() {
 if (grounded_ || overrideGrounded_) {
 if(overrideGrounded_)
-dy_ = -player_constants::JUMP_SPEED;
+dy_ = -p_consts::JUMP_SPEED;
 else
-dy_ = -player_constants::JUMP_SPEED * 0.75;
+dy_ = -p_consts::JUMP_SPEED * 0.75;
 }
 playAnimation(facing_ == RIGHT ? "FallRight" : "FallLeft");
 }
@@ -239,16 +247,16 @@ if (!isWalking) {
 if (currentAnimation_ != "RunLeft" && currentAnimation_ != "WalkLeft" && currentAnimation_ != "FallLeft") {
 if(grounded_ && currentAnimation_ != (facing_ == RIGHT ? "JumpRight" : "JumpLeft"))
 playAnimation("StartRunLeft");
-dx_ = -player_constants::WALK_SPEED*frameIndex_;
+dx_ = -p_consts::WALK_SPEED*frameIndex_;
 } else {
 if (grounded_ && currentAnimation_ != (facing_ == RIGHT ? "JumpRight" : "JumpLeft"))
 playAnimation("RunLeft");
-dx_ = -player_constants::RUN_SPEED;
+dx_ = -p_consts::RUN_SPEED;
 }
 } else {
 if (grounded_ && currentAnimation_ != (facing_ == RIGHT ? "JumpRight" : "JumpLeft"))
 playAnimation("WalkLeft");
-dx_ = -player_constants::WALK_SPEED;
+dx_ = -p_consts::WALK_SPEED;
 }
 facing_ = LEFT;
 }
@@ -261,14 +269,14 @@ if (!isWalking) {
 if (currentAnimation_ != "RunRight" && currentAnimation_ != "WalkRight" && currentAnimation_ != "FallRight") {
 if(grounded_ && currentAnimation_ != (facing_ == RIGHT ? "JumpRight" : "JumpLeft"))
 playAnimation("StartRunRight");
-dx_ = player_constants::WALK_SPEED*frameIndex_;
+dx_ = p_consts::WALK_SPEED*frameIndex_;
 } else {
 if(grounded_ && currentAnimation_ != (facing_ == RIGHT ? "JumpRight" : "JumpLeft"))
 playAnimation("RunRight");
-dx_ = player_constants::RUN_SPEED;
+dx_ = p_consts::RUN_SPEED;
 }
 } else {
-dx_ = player_constants::WALK_SPEED;
+dx_ = p_consts::WALK_SPEED;
 if(grounded_ && currentAnimation_ != (facing_ == RIGHT ? "JumpRight" : "JumpLeft"))
 playAnimation("WalkRight");
 }
