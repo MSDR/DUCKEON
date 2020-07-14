@@ -86,10 +86,11 @@ void Level::loadMap(Graphics & graphics, const std::string &mapName) {
 			std::string rgb = std::to_string(r) + '_' + std::to_string(g) + '_' + std::to_string(b);
 			Tile newTile = Tile(tileIndex_[rgb].getTileName(), tilePos);
 			loadedTiles_.push_back(newTile);
-
+			if(rgb=="255_255_255") collisionRects_.push_back(Rectangle(tileX * globals::SPRITE_SCALE, tileY * globals::SPRITE_SCALE,
+				16 * globals::SPRITE_SCALE, 16 * globals::SPRITE_SCALE)); //this is a pretty jank solution to combine visual&collision maps but its ok for now
 			std::cout << "Loaded " << newTile.getTileName() << " tile at " << tilePos.x << ", " << tilePos.y << std::endl;
 		}
-
+		/*
 		//Parse collision
 		Uint32 pixelC = get_pixel32(collisionMap, tileCounter % size_.x, tileCounter / size_.x);
 		SDL_GetRGBA(pixelC, map->format, &r, &g, &b, &a);
@@ -107,7 +108,7 @@ void Level::loadMap(Graphics & graphics, const std::string &mapName) {
 				//Tile tile(tiles::collision.getTileName(), tilePos); loadedTiles_.push_back(tile);  //REMOVE COMMENT IF SHOW COLLISION
 			}
 		}
-
+		*/
 		tileCounter++;
 		//std::cout << "tileCounter: " << tileCounter << ", limit: " << size_.x * size_.y << "\n";
 	}

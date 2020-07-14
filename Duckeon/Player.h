@@ -8,27 +8,30 @@
 #include <iostream>
 
 namespace p_consts {
-	const float RUN_MULT = 1.75f;
-	const float WALK_SPEED = 0.0225f;
-	const float MAX_WALK_SPEED = 0.14f;
+	const float RUN_MULT = 2.1f;
+	const float WALK_SPEED = 0.0025f;
+	const float MAX_WALK_SPEED = 0.075f;
+	const float GROUNDED_FRICTION = 0.25f; //btw 1 and 0
 
 	const float JUMP_SPEED = 0.227f;
 	const float JUMP_FORGIVENESS_WINDOW = 75.0f;
 	const float MIN_DOUBLE_JUMP = 0.07f;
 	const float MAX_DOUBLE_JUMP = 0.27f;
 	const float DOUBLE_JUMP_CHARGE = 500.0f;
+	const float AERIAL_FRICTION = 0.045f; //btw 1 and 0
 
 //	const float DOUBLE_JUMP_MULT = 4.20f;
 //	const float MIN_DOUBLE_JUMP_SPEED = -0.0265f;
 //	const float MAX_DOUBLE_JUMP = 0.495f;
-	const float GLIDE_MULT = 0.575f;
-	const float GLIDE_START_SPEED = 0.1f;
+	const float GLIDE_MULT = 0.577f;
+	const float GLIDE_START_SPEED = 0.095f;
+	const float GLIDING_FRICTION = 0.015f; //btw 1 and 0
 
 
 	const int PLAYER_WIDTH = 16;
 	const int PLAYER_HEIGHT = 16;
 
-	const float BASE_GRAVITY = 0.0008f;//0.0007f
+	const float BASE_GRAVITY = 0.00081f;//0.0007f
 	const float GRAVITY_CAP = 0.8f;
 }
 
@@ -73,7 +76,7 @@ private:
 	float gravity_;
 
 	float doubleJumpHeight() { 
-		return ((msSinceGrounded_ > p_consts::DOUBLE_JUMP_CHARGE ? 1 : std::pow(msSinceGrounded_/p_consts::DOUBLE_JUMP_CHARGE, 2)) *
+		return ((msSinceGrounded_ > p_consts::DOUBLE_JUMP_CHARGE ? 1 : std::pow(msSinceGrounded_/p_consts::DOUBLE_JUMP_CHARGE, 3)) *
 				  (p_consts::MAX_DOUBLE_JUMP-p_consts::MIN_DOUBLE_JUMP)) +
 				 p_consts::MIN_DOUBLE_JUMP;
 			

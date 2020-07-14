@@ -94,7 +94,7 @@ void Player::jump() {
 void Player::move(bool isRunning, Direction dir) {
 	dx_ = (dx_ <= 0.1f ? p_consts::WALK_SPEED : dx_);
 
-	if (isRunning) dx_ = p_consts::MAX_WALK_SPEED*p_consts::RUN_MULT;
+	if (isRunning) dx_ += (p_consts::MAX_WALK_SPEED*p_consts::RUN_MULT - std::abs(dx_))*0.75;
 	else dx_ += std::max((p_consts::MAX_WALK_SPEED-std::abs(dx_))/2, 0.0f);
 
 	if (dir == LEFT) { 
@@ -105,12 +105,15 @@ void Player::move(bool isRunning, Direction dir) {
 	}
 
 	//std::cout << dx_ << std::endl;
-	playAnimation("Walk");
+	if(!isGliding_) playAnimation(isRunning ? "Run" : "Waddle");
 }
 
 
 void Player::stopMoving() {
-	dx_ = 0;
+	dx_ = grounded_  ? (1 - p_consts::GROUNDED_FRICTION)*dx_ : 
+			isGliding_ ? (1 - p_consts::GLIDING_FRICTION)*dx_ : 
+							 (1 - p_consts::AERIAL_FRICTION)*dx_;
+
 	if (!isGliding_) playAnimation("Idle");
 	
 	/*
@@ -140,14 +143,20 @@ void Player::animationDone(std::string currentAnimation) {
 }
 
 void Player::setUpAnimations() {
-	addAnimation(1, 4, 0, "L_Idle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
-	addAnimation(1, 0, 0, "R_Idle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(3, 4, 0, "L_Run", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(3, 0, 0, "R_Run", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
 
-	addAnimation(4, 4, 0, "L_Walk", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
-	addAnimation(4, 0, 0, "R_Walk", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(4, 4, 2, "L_Waddle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(4, 0, 2, "R_Waddle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
 
-	addAnimation(4, 4, 2, "L_Glide", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
-	addAnimation(4, 0, 2, "R_Glide", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(4, 4, 4, "L_Glide", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(4, 0, 4, "R_Glide", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+
+	addAnimation(1, 4, 6, "L_Idle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(1, 0, 6, "R_Idle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+
+	
+
 
 	/*addAnimation(1, 13, 0, "IdleLeft", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
 
