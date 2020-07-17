@@ -7,9 +7,10 @@ Tile::Tile()
 }
 
 //limeoats also had a Vector2 size as the second parameter
-Tile::Tile(std::string tileName, Vector2 position) :
+Tile::Tile(std::string tileName, bool hasCollision, Vector2 position) :
 	filePath_(std::string("Images/Tiles/" + tileName + ".png")),
 	tileName_(tileName),
+	hasCollision_(hasCollision),
 	size_(Vector2(16, 16)) , //if tile size ever changes, edit int tileX = tileCounter % size_.x * 16; in Level.cpp accordingly also the line where I add a rect to the collisionBoxes
 	position_(Vector2(position.x * globals::SPRITE_SCALE, position.y * globals::SPRITE_SCALE))
 {

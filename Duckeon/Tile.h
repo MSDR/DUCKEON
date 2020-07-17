@@ -9,13 +9,15 @@
 class Tile {
 public:
 	Tile();
-	Tile(std::string tileName, Vector2 position = Vector2(0,0));
+	Tile(std::string tileName, bool hasCollision = false, Vector2 position = Vector2(0,0));
 
 	void update(int elapsedTime);
 	void draw(Graphics &graphics);
 
 	std::string getFilePath() { return filePath_; }
 	std::string getTileName() { return tileName_; }
+
+	bool hasCollision_;
 private:
 	SDL_Texture* image_;
 	std::string filePath_;

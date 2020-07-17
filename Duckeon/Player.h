@@ -8,16 +8,16 @@
 #include <iostream>
 
 namespace p_consts {
-	const float RUN_MULT = 2.1f;
-	const float WALK_SPEED = 0.0025f;
-	const float MAX_WALK_SPEED = 0.075f;
+	const float MAX_RUN_SPEED = .14f;
+	const float WALK_SPEED = 0.02f;
+	const float MAX_WALK_SPEED = 0.04f;
 	const float GROUNDED_FRICTION = 0.25f; //btw 1 and 0
 
 	const float JUMP_SPEED = 0.227f;
 	const float JUMP_FORGIVENESS_WINDOW = 75.0f;
-	const float MIN_DOUBLE_JUMP = 0.07f;
+	const float MIN_DOUBLE_JUMP = 0.094f;
 	const float MAX_DOUBLE_JUMP = 0.27f;
-	const float DOUBLE_JUMP_CHARGE = 500.0f;
+	const float DOUBLE_JUMP_CHARGE = 520.0f;
 	const float AERIAL_FRICTION = 0.045f; //btw 1 and 0
 
 //	const float DOUBLE_JUMP_MULT = 4.20f;

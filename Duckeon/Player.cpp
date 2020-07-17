@@ -18,7 +18,7 @@ Player::Player(Graphics & graphics, float x, float y)
 	playAnimation("Idle");
 }
 
-void Player::draw(Graphics & graphics) {
+void Player::draw(Graphics &graphics) {
 	AnimatedSprite::draw(graphics, x_, y_);
 
 	SDL_Renderer* renderer = graphics.getRenderer();
@@ -32,7 +32,7 @@ void Player::draw(Graphics & graphics) {
 
 		if(hasDoubleJump_) {
 			float jumpMeter = std::abs((doubleJumpHeight())/p_consts::MAX_DOUBLE_JUMP);
-			std::cout << jumpMeter << std::endl;
+			//std::cout << jumpMeter << std::endl;
 			r.y += 7*globals::SPRITE_SCALE - (int)(7*globals::SPRITE_SCALE)*jumpMeter;
 			r.h = (7*globals::SPRITE_SCALE*jumpMeter);
 			SDL_RenderFillRect(renderer, &r); 
@@ -92,19 +92,23 @@ void Player::jump() {
 }
 
 void Player::move(bool isRunning, Direction dir) {
-	dx_ = (dx_ <= 0.1f ? p_consts::WALK_SPEED : dx_);
+	dx_ = (std::abs(dx_) <= 0.00001f ? p_consts::WALK_SPEED : std::abs(dx_));
 
-	if (isRunning) dx_ += (p_consts::MAX_WALK_SPEED*p_consts::RUN_MULT - std::abs(dx_))*0.75;
-	else dx_ += std::max((p_consts::MAX_WALK_SPEED-std::abs(dx_))/2, 0.0f);
+	if (isRunning) dx_ += (p_consts::MAX_RUN_SPEED  - std::abs(dx_))*0.15;
+	else				dx_ += (p_consts::MAX_WALK_SPEED - std::abs(dx_))*0.08;
 
+	std::cout << dx_ << std::endl;
+
+	if (dir != facing_) {
+		dx_ = 0; //adds a single update frame of turn around delay
+	}
 	if (dir == LEFT) { 
 		dx_ *= -1;
-		facing_ = LEFT;
-	} else {
-		facing_ = RIGHT;
-	}
+	} 
 
-	//std::cout << dx_ << std::endl;
+	facing_ = dir;
+
+	std::cout << dx_ << std::endl;
 	if(!isGliding_) playAnimation(isRunning ? "Run" : "Waddle");
 }
 
