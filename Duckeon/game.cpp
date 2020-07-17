@@ -72,7 +72,6 @@ void Game::gameLoop() {
 		}
 
 		//Movement
-
 		if (input.isKeyHeld(keys::moveLeft)) {
 			player_.move(input.isKeyHeld(keys::run), LEFT);
 		} 

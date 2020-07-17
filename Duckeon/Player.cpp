@@ -92,12 +92,10 @@ void Player::jump() {
 }
 
 void Player::move(bool isRunning, Direction dir) {
-	dx_ = (std::abs(dx_) <= 0.00001f ? p_consts::WALK_SPEED : std::abs(dx_));
+	dx_ = (std::abs(dx_) <= 0.00001f ? p_consts::MIN_WALK_SPEED : std::abs(dx_));
 
 	if (isRunning) dx_ += (p_consts::MAX_RUN_SPEED  - std::abs(dx_))*0.15;
 	else				dx_ += (p_consts::MAX_WALK_SPEED - std::abs(dx_))*0.08;
-
-	std::cout << dx_ << std::endl;
 
 	if (dir != facing_) {
 		dx_ = 0; //adds a single update frame of turn around delay
