@@ -13,7 +13,7 @@ public:
 	Level();
 
 	void update(int elapsedTime);
-	void draw(Graphics &graphics);
+	void draw(Graphics &graphics, bool showCollisionBoxes = false);
 
 	//Returns true on success, false if error
 	bool changeMap(Graphics &graphics, const std::string &mapName, Vector2 spawnPoint = Vector2(100,100));

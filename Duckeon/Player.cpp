@@ -9,7 +9,8 @@ Player::Player(Graphics & graphics, float x, float y)
 	: AnimatedSprite(graphics, "Images/duck.png", 0, 0, p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, x, y, 75),
 	dx_(0), dy_(0),
 	facing_(LEFT),
-	isGliding_(false), hasDoubleJump_(true), msSinceGrounded_(0.0f)
+	isGliding_(false), hasDoubleJump_(true), msSinceGrounded_(0.0f),
+	hasGun_(false)
 	//grounded_(false)
 {
 	graphics.loadImage("Images/duck.png");
@@ -18,17 +19,20 @@ Player::Player(Graphics & graphics, float x, float y)
 	playAnimation("Idle");
 }
 
-void Player::draw(Graphics &graphics) {
+void Player::draw(Graphics &graphics, bool showCollisionBoxes) {
 	AnimatedSprite::draw(graphics, x_, y_);
 
 	SDL_Renderer* renderer = graphics.getRenderer();
+	SDL_Rect r;
 
+	//Draw double jump charge indicator -- could use an upgrade
 	if(!grounded_) {
 		SDL_SetRenderDrawColor(renderer, 6, 238, 89, 200);
 
-		SDL_Rect r = { facing_ == LEFT ? boundingBox_.getRight() : boundingBox_.getLeft()-3*globals::SPRITE_SCALE, boundingBox_.getTop(), 
-							3*globals::SPRITE_SCALE, 7*globals::SPRITE_SCALE };
-		SDL_RenderDrawRect(renderer, &r); 
+		r.x = facing_ == LEFT ? boundingBox_.getRight() : boundingBox_.getLeft() - 3 * globals::SPRITE_SCALE; 
+		r.y = boundingBox_.getTop();
+		r.w = 3 * globals::SPRITE_SCALE; r.h = 7 * globals::SPRITE_SCALE;
+		SDL_RenderDrawRect(renderer, &r);
 
 		if(hasDoubleJump_) {
 			float jumpMeter = std::abs((doubleJumpHeight())/p_consts::MAX_DOUBLE_JUMP);
@@ -40,13 +44,16 @@ void Player::draw(Graphics &graphics) {
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); 
 	}
 		
-
-	//shows player bounding box 
-	/*{ r = { boundingBox_.getLeft(), boundingBox_.getTop(), boundingBox_.getWidth(), boundingBox_.getHeight() };
+	if(showCollisionBoxes) {
+		r.x = boundingBox_.getLeft();
+		r.y = boundingBox_.getTop();
+		r.w = boundingBox_.getWidth(); 
+		r.h = boundingBox_.getHeight();
+	
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-		//SDL_RenderDrawRect(renderer, &r); 
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); }*/
-		 
+		SDL_RenderDrawRect(renderer, &r); 
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	}
 }
 
 void Player::update(float elapsedTime) {
@@ -94,8 +101,8 @@ void Player::jump() {
 void Player::move(bool isRunning, Direction dir) {
 	dx_ = (std::abs(dx_) <= 0.00001f ? p_consts::MIN_WALK_SPEED : std::abs(dx_));
 
-	if (isRunning) dx_ += (p_consts::MAX_RUN_SPEED  - std::abs(dx_))*0.15;
-	else				dx_ += (p_consts::MAX_WALK_SPEED - std::abs(dx_))*0.08;
+	if (isRunning) dx_ += (p_consts::MAX_RUN_SPEED  - std::abs(dx_))*p_consts::RUN_ACCELERATION;
+	else				dx_ += ((grounded_ ? p_consts::MAX_WALK_SPEED : p_consts::AIR_WALK_SPEED) - std::abs(dx_))*p_consts::WALK_ACCELERATION;
 
 	if (dir != facing_) {
 		dx_ = 0; //adds a single update frame of turn around delay
@@ -157,6 +164,19 @@ void Player::setUpAnimations() {
 	addAnimation(1, 4, 6, "L_Idle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
 	addAnimation(1, 0, 6, "R_Idle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
 
+	//Gun animations below
+	
+	addAnimation(3, 4, 1, "L_G_Run", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(3, 0, 1, "R_G_Run", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+
+	addAnimation(4, 4, 3, "L_G_Waddle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(4, 0, 3, "R_G_Waddle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+
+	addAnimation(4, 4, 5, "L_G_Glide", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(4, 0, 5, "R_G_Glide", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+
+	addAnimation(1, 5, 6, "L_G_Idle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
+	addAnimation(1, 1, 6, "R_G_Idle", p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, Vector2(0, 0));
 	
 
 

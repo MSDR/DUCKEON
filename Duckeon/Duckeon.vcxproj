@@ -140,7 +140,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimatedSprite.h" />
-    <ClInclude Include="Collider.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="graphics.h" />

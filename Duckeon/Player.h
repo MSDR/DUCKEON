@@ -8,9 +8,12 @@
 #include <iostream>
 
 namespace p_consts {
-	const float MAX_RUN_SPEED = .14f;
 	const float MIN_WALK_SPEED = 0.02f;
+	const float WALK_ACCELERATION = 0.09;
 	const float MAX_WALK_SPEED = 0.04f;
+	const float AIR_WALK_SPEED = 0.065f;
+	const float RUN_ACCELERATION = 0.03f;
+	const float MAX_RUN_SPEED = .13f;
 	const float GROUNDED_FRICTION = 0.25f; //btw 1 and 0
 
 	const float JUMP_SPEED = 0.25f;
@@ -36,7 +39,7 @@ class Player : public AnimatedSprite {
 public:
 	Player();
 	Player(Graphics &graphics, float x, float y);
-	void draw(Graphics &graphics);
+	void draw(Graphics &graphics, bool showCollisionBoxes = false);
 	void update(float elapsedTime);
 	void updateBoundingBox();
 
@@ -51,8 +54,12 @@ public:
 	void move(bool isRunning, Direction dir);
 	void stopMoving();
 
-	void playAnimation(std::string animation, bool once = false)
-		{	AnimatedSprite::playAnimation((facing_ == LEFT ? "L_" : "R_") + animation, once); }
+	void shoot();
+
+	void playAnimation(std::string animation, bool once = false) {
+		std::string anim = (facing_ == LEFT ? "L_" : "R_"); anim += (hasGun_ ? "G_" : "") + animation;
+		AnimatedSprite::playAnimation(anim, once); }
+	
 	virtual void animationDone(std::string currentAnimation);
 	virtual void setUpAnimations();
 
@@ -69,6 +76,7 @@ public:
 	bool grounded_;
 	float msSinceGrounded_;
 
+	bool hasGun_;
 private:
 	float gravity_;
 

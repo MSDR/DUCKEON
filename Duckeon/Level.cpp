@@ -189,24 +189,27 @@ void Level::loadMap(Graphics &graphics, const std::string &mapName) {
 }
 
 void Level::update(int elapsedTime) {
-
+	//update geese
 }
 
-void Level::draw(Graphics &graphics) {
+void Level::draw(Graphics &graphics, bool showCollisionBoxes) {
 	for (int i = 0; i < loadedTiles_.size(); ++i) {
 		loadedTiles_[i].draw(graphics);
 	}
-	SDL_SetRenderDrawColor(graphics.getRenderer(), 255, 0, 0, 255);
-	for (int c = 0; c < collisionRects_.size(); ++c) {
-		SDL_Rect colRect;
-		colRect.x = collisionRects_[c].x_;
-		colRect.y = collisionRects_[c].y_;
-		colRect.w = collisionRects_[c].w_;
-		colRect.h = collisionRects_[c].h_;
 
-		SDL_RenderDrawRect(graphics.getRenderer(), &colRect);
+	if(showCollisionBoxes) {
+		SDL_SetRenderDrawColor(graphics.getRenderer(), 255, 0, 0, 255);
+		for (int c = 0; c < collisionRects_.size(); ++c) {
+			SDL_Rect colRect;
+			colRect.x = collisionRects_[c].x_;
+			colRect.y = collisionRects_[c].y_;
+			colRect.w = collisionRects_[c].w_;
+			colRect.h = collisionRects_[c].h_;
+
+			SDL_RenderDrawRect(graphics.getRenderer(), &colRect);
+		}
+		SDL_SetRenderDrawColor(graphics.getRenderer(), 0, 0, 0, 255);
 	}
-	SDL_SetRenderDrawColor(graphics.getRenderer(), 0, 0, 0, 255);
 }
 
 std::vector<Rectangle> Level::checkTileCollisions(const Rectangle & other) {

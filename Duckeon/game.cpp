@@ -120,8 +120,8 @@ void Game::gameLoop() {
 void Game::draw(Graphics &graphics) {
 	graphics.clear();
 	//SDL_RenderCopy(graphics.getRenderer(), background_, NULL, NULL);
-	player_.draw(graphics);
-	level_.draw(graphics);
+	player_.draw(graphics, false);
+	level_.draw(graphics, true);
 	graphics.flip();
 }
 
@@ -129,7 +129,9 @@ void Game::update(float elapsedTime) {
 	player_.update(elapsedTime);
 	level_.update(elapsedTime);
 
-
+	//std::vector<Rectangle> rectsHurting
+	//make a level::getHurtCollisions(player_.getBoundingBox, player_.getBulletBoxes)
+	//the level holds all the geese and their bullets, the player holds their bullets
 	std::vector<Rectangle> rectsColliding;
 	if ((rectsColliding = level_.checkTileCollisions(player_.getBoundingBox())).size() > 0){
 		player_.handleTileCollisions(rectsColliding);
