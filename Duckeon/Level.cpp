@@ -104,7 +104,6 @@ void Level::loadMap(Graphics &graphics, const std::string &mapName) {
 
 				//Look down from marked row of pixels
 				int numRowsIterated = 1;
-				int numColsIterated = 1;
 				tileCounter += size_.x; //first we iterate by row
 				while (tileCounter < (size_.x*size_.y)) {
 					//Search down for new rows of pixels in box

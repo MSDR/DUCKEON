@@ -10,6 +10,7 @@ namespace keys {
 	SDL_Scancode moveRight = SDL_SCANCODE_RIGHT;
 	SDL_Scancode run = SDL_SCANCODE_LSHIFT;
 
+	SDL_Scancode duck = SDL_SCANCODE_DOWN;
 	SDL_Scancode jump = SDL_SCANCODE_SPACE;
 
 	SDL_Scancode quitGame = SDL_SCANCODE_ESCAPE;
@@ -73,13 +74,13 @@ void Game::gameLoop() {
 
 		//Movement
 		if (input.isKeyHeld(keys::moveLeft)) {
-			player_.move(input.isKeyHeld(keys::run), LEFT);
+			player_.move(input.isKeyHeld(keys::run), input.isKeyHeld(keys::duck), LEFT);
 		} 
 		if (input.isKeyHeld(keys::moveRight)) {
-			player_.move(input.isKeyHeld(keys::run), RIGHT);
+			player_.move(input.isKeyHeld(keys::run), input.isKeyHeld(keys::duck), RIGHT);
 		}
 		if(!input.isKeyHeld(keys::moveLeft) && !input.isKeyHeld(keys::moveRight)) {
-			player_.stopMoving();
+			player_.stopMoving(input.isKeyHeld(keys::duck));
 		}
 
 		if (input.wasKeyPressed(keys::jump)) {
@@ -120,7 +121,7 @@ void Game::gameLoop() {
 void Game::draw(Graphics &graphics) {
 	graphics.clear();
 	//SDL_RenderCopy(graphics.getRenderer(), background_, NULL, NULL);
-	player_.draw(graphics, false);
+	player_.draw(graphics, true);
 	level_.draw(graphics, true);
 	graphics.flip();
 }

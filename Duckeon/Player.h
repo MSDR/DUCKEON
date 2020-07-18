@@ -51,8 +51,8 @@ public:
 	//void moveRight(bool isWalking);
 
 	void jump();
-	void move(bool isRunning, Direction dir);
-	void stopMoving();
+	void move(bool isRunning, bool isDucking, Direction dir);
+	void stopMoving(bool isDucking);
 
 	void shoot();
 
