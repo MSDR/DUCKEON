@@ -38,10 +38,14 @@ void Game::gameLoop() {
 	Input input;
 	SDL_Event event;
 
-	player_ = Player(graphics, 120, 200);
+
+	background_ = SDL_CreateTextureFromSurface(graphics.getRenderer(), IMG_Load("Images/background.png"));
+
 	level_ = Level();
 	level_.changeMap(graphics, "demo");
-	background_ = SDL_CreateTextureFromSurface(graphics.getRenderer(), IMG_Load("Images/background.png"));
+	levelTier_ = 1;
+
+	player_ = Player(graphics, level_.getSpawnPoint());
 
 	int LAST_UPDATE_TIME = SDL_GetTicks();
 	int LAST_DRAW_TIME = LAST_UPDATE_TIME;
@@ -69,7 +73,7 @@ void Game::gameLoop() {
 		} 
 
 		if (input.wasKeyPressed(SDL_SCANCODE_R)) {
-			player_.x_ = 50; player_.y_ = 200; player_.dy_ = 0;
+			player_.respawn(level_.getSpawnPoint());
 		}
 
 		//Movement
@@ -121,7 +125,7 @@ void Game::gameLoop() {
 void Game::draw(Graphics &graphics) {
 	graphics.clear();
 	//SDL_RenderCopy(graphics.getRenderer(), background_, NULL, NULL);
-	player_.draw(graphics, true);
+	player_.draw(graphics, false);
 	level_.draw(graphics, true);
 	graphics.flip();
 }

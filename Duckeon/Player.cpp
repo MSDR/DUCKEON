@@ -5,8 +5,8 @@
 Player::Player() {
 }
 
-Player::Player(Graphics & graphics, float x, float y)
-	: AnimatedSprite(graphics, "Images/duck.png", 0, 0, p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, x, y, 75),
+Player::Player(Graphics & graphics, Vector2 spawnPos)
+	: AnimatedSprite(graphics, "Images/duck.png", 0, 0, p_consts::PLAYER_WIDTH, p_consts::PLAYER_HEIGHT, spawnPos.x, spawnPos.y, 75),
 	dx_(0), dy_(0),
 	facing_(LEFT),
 	isGliding_(false), hasDoubleJump_(true), msSinceGrounded_(0.0f),

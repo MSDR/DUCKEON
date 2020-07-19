@@ -38,16 +38,11 @@ bool Level::changeMap(Graphics & graphics, const std::string &mapName, Vector2 s
 //ALL LEVELS SHOULD BE 30x17 PIXELS
 void Level::loadMap(Graphics &graphics, const std::string &mapName) {
 	SDL_Surface* map = graphics.loadImage("Levels/" + mapName + ".png");
-	SDL_Surface* collisionMap = graphics.loadImage("Levels/C_" + mapName + ".png");
 
 	if (map == NULL) {
 		throw std::string("Map " + mapName + " not found.");
 		return;
 	}
-	/*if (collisionMap == NULL) {
-		throw std::string("A collision map for " + mapName + " not found.");
-		return;
-	}*/
 
 	loadedTiles_.clear();
 	collisionRects_.clear();
@@ -86,13 +81,18 @@ void Level::loadMap(Graphics &graphics, const std::string &mapName) {
 			tileCounter++;
 			continue;
 		} else { //non-empty tile
-			//Add the new tile to visuals
 			std::string rgb = std::to_string(r) + '_' + std::to_string(g) + '_' + std::to_string(b);
+			if (rgb == "228_213_128") {
+				spawnPoint_ = tilePos;
+				tileCounter++;
+				continue;
+			}
 			if (tileIndex_.find(rgb) == tileIndex_.end()) {
 				//std::cout << "Unrecognized tile with color << " << rgb << " found at [" << tilePos.x/16 << "," << tilePos.y/16 << "]\n";
 				tileCounter++;
 				continue;
 			}
+			//Add the new tile to visuals
 			Tile newTile = Tile(tileIndex_[rgb].getTileName(), tileIndex_[rgb].hasCollision_, tilePos);
 			loadedTiles_.push_back(newTile);
 

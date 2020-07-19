@@ -32,6 +32,7 @@ private:
 	Level level_;
 	SDL_Texture* background_;
 
+	int levelTier_;
 };
 
 #endif GAME_H_

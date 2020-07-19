@@ -19,8 +19,8 @@ namespace p_consts {
 	const float JUMP_SPEED = 0.25f;
 	const float JUMP_FORGIVENESS_WINDOW = 75.0f;
 	const float MIN_DOUBLE_JUMP = 0.095f;
-	const float MAX_DOUBLE_JUMP = 0.27f;
-	const float DOUBLE_JUMP_CHARGE = 500.0f;
+	const float MAX_DOUBLE_JUMP = 0.285f;
+	const float DOUBLE_JUMP_CHARGE = 550.0f;
 	const float AERIAL_FRICTION = 0.045f; //btw 1 and 0
 
 	const float GLIDE_MULT = 0.575f;
@@ -38,17 +38,12 @@ namespace p_consts {
 class Player : public AnimatedSprite {
 public:
 	Player();
-	Player(Graphics &graphics, float x, float y);
+	Player(Graphics &graphics, Vector2 spawnPos);
 	void draw(Graphics &graphics, bool showCollisionBoxes = false);
 	void update(float elapsedTime);
 	void updateBoundingBox();
 
-	//void disableDoubleJump();
-	//void startJump();
-	//void launch();
-	//void land();
-	//void moveLeft(bool isWalking);
-	//void moveRight(bool isWalking);
+	void respawn(Vector2 spawnPos) { x_ = spawnPos.x; y_ = spawnPos.y; dx_ = 0; dy_ = 0; }
 
 	void jump();
 	void move(bool isRunning, bool isDucking, Direction dir);
