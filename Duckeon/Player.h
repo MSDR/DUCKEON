@@ -19,8 +19,8 @@ namespace p_consts {
 	const float JUMP_SPEED = 0.25f;
 	const float JUMP_FORGIVENESS_WINDOW = 75.0f;
 	const float MIN_DOUBLE_JUMP = 0.095f;
-	const float MAX_DOUBLE_JUMP = 0.285f;
-	const float DOUBLE_JUMP_CHARGE = 550.0f;
+	const float MAX_DOUBLE_JUMP = 0.28f;
+	const float DOUBLE_JUMP_CHARGE = 540.0f;
 	const float AERIAL_FRICTION = 0.045f; //btw 1 and 0
 
 	const float GLIDE_MULT = 0.575f;
